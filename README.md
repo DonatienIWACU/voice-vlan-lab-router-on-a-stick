@@ -1,0 +1,3 @@
+Voice VLAN Lab with Router-on-a-Stick
+A Cisco lab setup demonstrating Voice and Data VLANs with IP Phones and PCs sharing the same switch port.
+Includes trunking, subinterface configuration, and ping test validation using Packet Tracer.
