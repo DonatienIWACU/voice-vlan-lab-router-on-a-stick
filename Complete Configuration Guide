@@ -1,0 +1,135 @@
+1.VLAN Configuration on Switch
+
+Switch> enable
+Switch# configure terminal
+
+! Create Data VLAN for PCs
+Switch(config)# vlan 10
+Switch(config-vlan)# name Data
+Switch(config-vlan)# exit
+
+! Create Voice VLAN for IP Phones
+Switch(config)# vlan 20
+Switch(config-vlan)# name Voice
+Switch(config-vlan)# exit
+
+2. Configure Switch Access Ports for Phones & PCs
+
+For ports Fa0/1 and Fa0/2 (connected to IP Phones):
+Switch(config)# interface range fa0/1 - 2
+Switch(config-if-range)# switchport mode access
+Switch(config-if-range)# switchport access vlan 10
+Switch(config-if-range)# switchport voice vlan 20
+Switch(config-if-range)# spanning-tree portfast
+Switch(config-if-range)# exit
+
+Data VLAN 10 for PC connected to IP Phone
+Voice VLAN 20 for IP Phone
+
+
+3. Configure Trunk Port to Router (Fa0/5)
+
+This is for Router-on-a-Stick (Inter-VLAN Routing):
+Switch(config)# interface fa0/5
+Switch(config-if)# switchport mode trunk
+Switch(config-if)# exit
+
+
+4. Configure Router (2811) for Inter-VLAN Routing
+Router> enable
+Router# configure terminal
+
+! Sub-interface for VLAN 10 (Data)
+Router(config)# interface fastEthernet0/0.10
+Router(config-subif)# encapsulation dot1q 10
+Router(config-subif)# ip address 192.168.10.1 255.255.255.0
+Router(config-subif)# exit
+
+! Sub-interface for VLAN 20 (Voice)
+Router(config)# interface fastEthernet0/0.20
+Router(config-subif)# encapsulation dot1q 20
+Router(config-subif)# ip address 192.168.20.1 255.255.255.0
+Router(config-subif)# exit
+
+! Enable the main interface
+Router(config)# interface fastEthernet0/0
+Router(config-if)# no shutdown
+Router(config-if)# exit
+
+
+
+5.Assign IP Addresses to PCs
+
+PC0:
+IP: 192.168.10.10
+Subnet: 255.255.255.0
+Gateway: 192.168.10.1
+
+
+PC1:
+IP: 192.168.10.11
+Subnet: 255.255.255.0
+Gateway: 192.168.10.1
+
+6. IP Phone Configuration (Optional in PT)
+
+In Packet Tracer, IP Phones get IP automatically if:
+Voice VLAN is configured on switchport
+
+
+DHCP server is available on router or network
+To assign static IP manually:
+Click IP Phone > Settings > Network Configuration
+Assign IP like 192.168.20.10 and Gateway 192.168.20.1
+
+
+(Optional) DHCP Configuration on Router
+For VLAN 10 (Data)
+Router(config)# ip dhcp pool DATA
+Router(dhcp-config)# network 192.168.10.0 255.255.255.0
+Router(dhcp-config)# default-router 192.168.10.1
+Router(dhcp-config)# exit
+
+For VLAN 20 (Voice)
+Router(config)# ip dhcp pool VOICE
+Router(dhcp-config)# network 192.168.20.0 255.255.255.0
+Router(dhcp-config)# default-router 192.168.20.1
+Router(dhcp-config)# exit
+
+Final Checks
+
+Switch>
+Switch>enable 
+Switch#show vlan brief
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/1, Fa0/2, Fa0/3, Fa0/4
+                                                Fa0/5, Fa0/6, Fa0/7, Fa0/8
+                                                Fa0/9, Fa0/10, Fa0/11, Fa0/12
+                                                Fa0/13, Fa0/14, Fa0/15, Fa0/16
+                                                Fa0/17, Fa0/18, Fa0/19, Fa0/20
+                                                Fa0/21, Fa0/22, Fa0/23, Fa0/24
+                                                Gig0/1, Gig0/2
+10   Data                             active    
+20   Voice                            active    
+1002 fddi-default                     active    
+1003 token-ring-default               active    
+1004 fddinet-default                  active    
+1005 trnet-default                    active    
+Switch#
+%LINK-5-CHANGED: Interface FastEthernet0/5, changed state to up
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/5, changed state to up
+
+
+
+Router>en
+Router#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol 
+FastEthernet0/0        unassigned      YES unset  up                    up 
+FastEthernet0/0.10     192.168.10.1    YES manual up                    up 
+FastEthernet0/0.20     192.168.20.1    YES manual up                    up 
+FastEthernet0/1        unassigned      YES unset  administratively down down 
+Vlan1                  unassigned      YES unset  administratively down down
+Router#
+
